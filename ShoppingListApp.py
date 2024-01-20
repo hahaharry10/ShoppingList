@@ -30,8 +30,9 @@ class ShoppingListApp:
             print(f"{self.tableInUse}:")
             print(f"\t 1. View List.")
             print(f"\t 2. Add item to list.")
-            print(f"\t 3. Remove item from ist.")
-            print(f"\t 4. Return to main menu.")
+            print(f"\t 3. Remove item from list.")
+            print(f"\t 4. Update value in list.")
+            print(f"\t 5. Return to main menu.")
             print(f"\n")
             print(f"Enter number of the desired function...")
             
@@ -68,7 +69,7 @@ class ShoppingListApp:
                             else:
                                 print("Only one word of max 255 characters allowed.")
                         while True:
-                            shortDescription = input("Total Price: ")
+                            shortDescription = input("Description: ")
                             if len(shortDescription) < 255:
                                 break
                         errorMessage = self.insertIntoTable(item, quantity, unitPrice, totalPrice, catagory, shortDescription)
@@ -78,8 +79,20 @@ class ShoppingListApp:
                         else:
                             print(errorMessage)
                     elif response == 3:
-                        pass
+                        print("\n")
+                        itemToRemove = input("Item You would like to remove (just press enter to go back): ")
+                        if itemToRemove == "":
+                            break
+                        else:
+                            errorMessage = self.deleteFromTable(itemToRemove)
+                            if errorMessage == None:
+                                print(f"Query Accepted: {itemToRemove} removed from {self.tableInUse}.")
+                                break
+                            else:
+                                print(errorMessage)
                     elif response == 4:
+                        pass
+                    elif response == 5:
                         self.exitTable()
                         print("Entering Main Menu...")
                         return
@@ -97,6 +110,15 @@ class ShoppingListApp:
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Invalid values."
+        except Exception as e:
+            return e
+
+    def deleteFromTable(self, item) -> int:
+        try:
+            self.cursor.execute(f"DELETE FROM {self.tableInUse} WHERE item={item};")
+            return None
+        except sqlite3.OperationalError:
+            return f"Query Rejected: Item does not exist."
         except Exception as e:
             return e
 
