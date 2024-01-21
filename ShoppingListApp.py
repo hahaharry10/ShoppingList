@@ -16,7 +16,7 @@ class ShoppingListApp:
 
     def createTable(self, shopName) -> str:
         try:
-            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(255) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT(23), totalPrice FLOAT(23), catagory VARCHAR(255), description VARCHAR(255));")
+            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(255) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(255), description VARCHAR(255));")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Table '{shopName}' already exists!"
@@ -106,7 +106,7 @@ class ShoppingListApp:
     
     def insertIntoTable(self, item, quantity, unitPrice, totalPrice, catagory, shortDescription) -> int:
         try:
-            self.cursor.execute(f"INSERT INTO {self.tableInUse} VALUES({item}, {quantity}, {unitPrice}, {totalPrice}, {catagory}, {shortDescription})")
+            self.cursor.execute(f"INSERT INTO {self.tableInUse} VALUES('{item}', {quantity}, {unitPrice}, {totalPrice}, '{catagory}', '{shortDescription}')")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Invalid values."
@@ -163,7 +163,7 @@ class ShoppingListApp:
                 print(f"\tThere are no shops yet.")
             #ENDIF
             print("\n")
-            print(f"Or:\n\t- 'CREATE [shop name]': Starts a new shop list.\n\t- 'DELETE [shop name]': Deletes the chosen shopping list")
+            print(f"Or:\n\t- 'CREATE [shop name]': Starts a new shop list.\n\t- 'DELETE [shop name]': Deletes the chosen shopping list\n\t- 'close': Save changes and quit.")
             print()
 
             while True:
