@@ -16,7 +16,7 @@ class ShoppingListApp:
 
     def createTable(self, shopName) -> str:
         try:
-            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(255) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(255), description VARCHAR(255));")
+            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(20) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(10), description VARCHAR(255));")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Table '{shopName}' already exists!"
@@ -67,7 +67,7 @@ class ShoppingListApp:
                             if len(catagory) < 255 and catagory.count(" ") == 0:
                                 break
                             else:
-                                print("Only one word of max 255 characters allowed.")
+                                print("Only one word of max 10 characters allowed.")
                         while True:
                             shortDescription = input("Description: ")
                             if len(shortDescription) < 255:
@@ -139,9 +139,24 @@ class ShoppingListApp:
 
     def viewTableContents(self) -> str:
         try:
-            return self.cursor.execute(f"SELECT * FROM {self.tableInUse}").fetchall()
+            contents = self.cursor.execute(f"SELECT * FROM {self.tableInUse}").fetchall()
         except Exception as e:
             return e
+
+        if contents == None:
+            return "No items in this shop."
+        
+        for item in contents:
+            print(item)
+        
+        # format Table:
+        output = " _____________________________________________________________________________________________________________________________________ \n"
+        for i in range(0, len(contents)):
+            output += "|{:20s}|{:>3}|{:>6.2f}|{:7.2f}|{:<10}|{:<255s}|\n".format(contents[i][0], contents[i][1], contents[i][2], contents[i][3], contents[i][4], contents[i][5])
+        
+        output += " _____________________________________________________________________________________________________________________________________ "
+
+        return output
 
     def closeApp(self) -> None:
         print("Closing App...")
