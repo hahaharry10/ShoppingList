@@ -72,6 +72,8 @@ class ShoppingListApp:
                             shortDescription = input("Description: ")
                             if len(shortDescription) < 255:
                                 break
+                            else:
+                                print("Description can only be 20 characters long.")
                         errorMessage = self.insertIntoTable(item, quantity, unitPrice, totalPrice, catagory, shortDescription)
                         if errorMessage == None:
                             print(f"Query Accepted: {item} inserted into {self.tableInUse}.")
@@ -152,7 +154,7 @@ class ShoppingListApp:
         # format Table:
         output = " _____________________________________________________________________________________________________________________________________ \n"
         for i in range(0, len(contents)):
-            output += "|{:20s}|{:>3}|{:>6.2f}|{:7.2f}|{:<10}|{:<255s}|\n".format(contents[i][0], contents[i][1], contents[i][2], contents[i][3], contents[i][4], contents[i][5])
+            output += "|{:20s}|{:>3}|{:>6.2f}|{:7.2f}|{:<10}|{:<20s}|\n".format(contents[i][0], contents[i][1], contents[i][2], contents[i][3], contents[i][4], contents[i][5])
         
         output += " _____________________________________________________________________________________________________________________________________ "
 
