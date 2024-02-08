@@ -93,7 +93,20 @@ class ShoppingListApp:
                             else:
                                 print(errorMessage)
                     elif response == 4:
-                        pass
+                        itemToChange = input("What item would you like to update? ")
+                        tableContents = self.getTableContents()
+                        if itemToChange not in tableContents[:,0]:
+                            print("ERROR: Item not in the list.")
+                        else:
+                            for item in tableContents:
+                                if item[0] == itemToChange:
+                                    itemBeingChanged = item
+                            #ENDFOR
+                            propertyToChange = input("What property would you like to change?")
+                            new_value = input("What would you like to change it to?")
+
+                            response = self.updateTable(item, propertyToChange, new_value)
+
                     elif response == 5:
                         self.exitTable()
                         print("Entering Main Menu...")
@@ -124,8 +137,12 @@ class ShoppingListApp:
         except Exception as e:
             return e
 
-    def updateTable(self) -> int:
-        pass
+    def updateTable(self, item, property, new_value) -> str:
+        try:
+            self.cursor.execute(f"UPDATE {self.tableInUse} SET {property}={new_value} WHERE item='{item}'")
+            return None
+        except Exception as e:
+            return e
 
     def exitTable(self) -> None:
         self.tableInUse = None
@@ -139,11 +156,14 @@ class ShoppingListApp:
         except Exception as e:
             return e
 
-    def viewTableContents(self) -> str:
+    def getTableContents(self) -> list:
         try:
-            contents = self.cursor.execute(f"SELECT * FROM {self.tableInUse}").fetchall()
+            return self.cursor.execute(f"SELECT * FROM {self.tableInUse}").fetchall()
         except Exception as e:
             return e
+
+    def viewTableContents(self) -> str:
+        contents = self.getTableContents()
 
         if contents == None:
             return "No items in this shop."
