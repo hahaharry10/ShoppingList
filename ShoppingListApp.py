@@ -16,27 +16,89 @@ class ShoppingListApp:
 
     def createTable(self, shopName) -> str:
         try:
-            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(20) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(10), description VARCHAR(255));")
+            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(20) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(10), description VARCHAR(80));")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Table '{shopName}' already exists!"
         except Exception as e:
             return e
 
+    def validateItemName(self) -> str:
+        while True:
+            item = input("Item Name: ")
+            if len(item) <= 255:
+                return item
+            else:
+                print("Invalid Input: Length must be 20 characters or less.")
+        #ENDWHILE
+
+    def validateQuantity(self) -> int:
+        while True:
+            quantity = input("Quantity: ")
+            if quantity.isdigit():
+                return quantity
+            else:
+                print("Invalid Input: Must be an integer.")
+        #ENDWHILE
+
+    def validateUnitPrice(self) -> float:
+        while True:
+            unitPrice = input("Unit Price: ")
+            if unitPrice.replace(".", "").isdigit():
+                return unitPrice
+            else:
+                print("Invalid Input: Must be a non-negative real number.")
+        #ENDWHILE
+
+    def validateTotalPrice(self, quantity, unitPrice) -> float:
+        while True:
+            offer = input("Is there a discount (y/n)? ")
+            if offer == "n":
+                return float(quantity) * float(unitPrice)
+            elif offer == "y":
+                while True:
+                    totalPrice = input("Total Price: ")
+                    if totalPrice.replace(".","").isdigit():
+                        return totalPrice
+                    else:
+                        print("Invalid Input: Must be a non-negative real number.")
+                        break
+                #ENDWHILE
+            else:
+                continue
+        #ENDWHILE
+
+    def validateCategory(self) -> str:
+        while True:
+            category = input("Category: ")
+            if len(category) <= 10 and category.count(" ") == 0:
+                return category
+            else:
+                print("Invalid Input: Must be one word of 10 characters or less")
+        #ENWHILE
+
+    def validateDescription(self) -> str:
+        while True:
+            description = input("Description: ")
+            if len(description) <= 80:
+                return description
+            else:
+                print("Invalid Input: Must be less than 80 characters long.")
+                
+
     def enterTable(self, table) -> None:
         self.tableInUse = table
 
         while True:
-            print(f"{self.tableInUse}:")
-            print(f"\t 1. View List.")
-            print(f"\t 2. Add item to list.")
-            print(f"\t 3. Remove item from list.")
-            print(f"\t 4. Update value in list.")
-            print(f"\t 5. Return to main menu.")
-            print(f"\n")
-            print(f"Enter number of the desired function...")
-            
             while True:
+                print(f"{self.tableInUse}:")
+                print(f"\t 1. View List.")
+                print(f"\t 2. Add item to list.")
+                print(f"\t 3. Remove item from list.")
+                print(f"\t 4. Update value in list.")
+                print(f"\t 5. Return to main menu.")
+                print(f"\n")
+                print(f"Enter number of the desired function...")
                 response = input("Input: ")
                 if response.isdigit() == False:
                     continue
@@ -46,37 +108,17 @@ class ShoppingListApp:
                         print(self.viewTableContents())
                         break
                     elif response == 2:
-                        while True:
-                            item = input("Item: ")
-                            if len(item) <= 255:
-                                break
-                        while True:
-                            quantity = input("Quanity: ")
-                            if quantity.isdigit():
-                                break
-                        while True:
-                            unitPrice = input("Unit Price: ")
-                            if unitPrice.replace(".", "").isdigit():
-                                break
-                        while True:
-                            totalPrice = input("Total Price: ")
-                            if totalPrice.replace(".", "").isdigit():
-                                break
-                        while True:
-                            catagory = input("Catagory: ")
-                            if len(catagory) < 255 and catagory.count(" ") == 0:
-                                break
-                            else:
-                                print("Only one word of max 10 characters allowed.")
-                        while True:
-                            shortDescription = input("Description: ")
-                            if len(shortDescription) < 255:
-                                break
-                            else:
-                                print("Description can only be 20 characters long.")
-                        errorMessage = self.insertIntoTable(item, quantity, unitPrice, totalPrice, catagory, shortDescription)
+                        print("Enter Details about the item:")
+                        itemName = self.validateItemName()
+                        quantity = self.validateQuantity()
+                        unitPrice = self.validateUnitPrice()
+                        totalPrice = self.validateTotalPrice(quantity, unitPrice)
+                        category = self.validateCategory()
+                        description = self.validateDescription()
+
+                        errorMessage = self.insertIntoTable(itemName, quantity, unitPrice, totalPrice, category, description)
                         if errorMessage == None:
-                            print(f"Query Accepted: {item} inserted into {self.tableInUse}.")
+                            print(f"Query Accepted: {itemName} inserted into {self.tableInUse}.")
                             break
                         else:
                             print(errorMessage)
@@ -95,17 +137,32 @@ class ShoppingListApp:
                     elif response == 4:
                         itemToChange = input("What item would you like to update? ")
                         tableContents = self.getTableContents()
-                        if itemToChange not in tableContents[:,0]:
+                        if itemToChange not in [item[0] for item in tableContents]:
                             print("ERROR: Item not in the list.")
                         else:
-                            for item in tableContents:
-                                if item[0] == itemToChange:
-                                    itemBeingChanged = item
-                            #ENDFOR
                             propertyToChange = input("What property would you like to change?")
+                            if propertyToChange.lower() == "quantity":
+                                propertyToChange = "quntity"
+                            elif propertyToChange.lower() == "unit price":
+                                propertyToChange = "unitPrice"
+                            elif propertyToChange == "total price":
+                                propertyToChange = "totalPrice"
+                            elif propertyToChange == "category":
+                                propertyToChange == "category"
+                            elif propertyToChange == "description":
+                                propertyToChange = "description"
+                            else:
+                                print("ERROR: Invalid property!")
+                                break
                             new_value = input("What would you like to change it to?")
 
-                            response = self.updateTable(item, propertyToChange, new_value)
+                            errorMessage = self.updateTable(itemToChange, propertyToChange, new_value)
+
+                            if errorMessage == None:
+                                print(f"Update Successful...")
+                            else:
+                                print(errorMessage)
+                                break
 
                     elif response == 5:
                         self.exitTable()
@@ -115,8 +172,6 @@ class ShoppingListApp:
                         continue
                     #ENDIF
                 #ENDIF
-            #ENDWHILE
-            print("\n\n")
         #ENDWHILE
     
     def insertIntoTable(self, item, quantity, unitPrice, totalPrice, catagory, shortDescription) -> int:
@@ -138,8 +193,9 @@ class ShoppingListApp:
             return e
 
     def updateTable(self, item, property, new_value) -> str:
+        print(f"item={item}\nproperty={property}\nnew_value={new_value}")
         try:
-            self.cursor.execute(f"UPDATE {self.tableInUse} SET {property}={new_value} WHERE item='{item}'")
+            self.cursor.execute(f"UPDATE {self.tableInUse} SET {property}={new_value} WHERE item={item}")
             return None
         except Exception as e:
             return e
