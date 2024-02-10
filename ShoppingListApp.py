@@ -16,7 +16,7 @@ class ShoppingListApp:
 
     def createTable(self, shopName) -> str:
         try:
-            self.cursor.execute(f"CREATE TABLE {shopName} (id item VARCHAR(20) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(10), description VARCHAR(80));")
+            self.cursor.execute(f"CREATE TABLE {shopName} (item VARCHAR(20) PRIMARY KEY, quantity INTEGER, unitPrice FLOAT, totalPrice FLOAT, catagory VARCHAR(10), description VARCHAR(80));")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Table '{shopName}' already exists!"
@@ -140,23 +140,12 @@ class ShoppingListApp:
                         if itemToChange not in [item[0] for item in tableContents]:
                             print("ERROR: Item not in the list.")
                         else:
-                            propertyToChange = input("What property would you like to change?")
-                            if propertyToChange.lower() == "quantity":
-                                propertyToChange = "quntity"
-                            elif propertyToChange.lower() == "unit price":
-                                propertyToChange = "unitPrice"
-                            elif propertyToChange == "total price":
-                                propertyToChange = "totalPrice"
-                            elif propertyToChange == "category":
-                                propertyToChange == "category"
-                            elif propertyToChange == "description":
-                                propertyToChange = "description"
-                            else:
-                                print("ERROR: Invalid property!")
-                                break
-                            new_value = input("What would you like to change it to?")
+                            print("Enter updated values below (to keep old values just press enter):")
+                            changedQuantity = self.validateQuantity()
+                            changedUnitPrice = self.validateUnitPrice()
+                            changedTotalPrice = self.validateTotalPrice(changedQuantity, changedUnitPrice)
 
-                            errorMessage = self.updateTable(itemToChange, propertyToChange, new_value)
+                            errorMessage = self.updateTable(itemToChange, changedQuantity, changedUnitPrice, changedTotalPrice)
 
                             if errorMessage == None:
                                 print(f"Update Successful...")
@@ -192,10 +181,9 @@ class ShoppingListApp:
         except Exception as e:
             return e
 
-    def updateTable(self, item, property, new_value) -> str:
-        print(f"item={item}\nproperty={property}\nnew_value={new_value}")
+    def updateTable(self, item, quantity, unitPrice, totalPrice) -> str:
         try:
-            self.cursor.execute(f"UPDATE {self.tableInUse} SET {property}={new_value} WHERE item={item}")
+            self.cursor.execute(f"UPDATE {self.tableInUse} SET quantity={quantity}, unitPrice={unitPrice}, totalPrice={totalPrice} WHERE id='{item}'")
             return None
         except Exception as e:
             return e
