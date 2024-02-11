@@ -1,2 +1,4 @@
 *.db
 foo.py
+createDB.py
+__pycache__
