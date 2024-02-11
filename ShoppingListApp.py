@@ -140,6 +140,16 @@ class ShoppingListApp:
                         if itemToChange not in [item[0] for item in tableContents]:
                             print("ERROR: Item not in the list.")
                         else:
+                            # Print the item the user desires to change:
+                            itemProperties = self.viewItemProperties(itemToChange)[0]
+                            seperator = "|______________________________________________________________________________________________________________________________________________________|\n"
+                            output = " ______________________________________________________________________________________________________________________________________________________ \n"
+                            output += "|{:20s}|{:10s}|{:12s}|{:13s}|{:10s}|{:<80s}|\n".format("Item:", "Quantity:", "Unit Price:", "Total Price:", "Category:", "Description:")
+                            output += "|____________________|__________|____________|_____________|__________|________________________________________________________________________________|\n"
+                            output += "|{:20s}|{:>10}|{:>12.2f}|{:13.2f}|{:<10}|{:<80s}|\n".format(itemProperties[0], itemProperties[1], itemProperties[2], itemProperties[3], itemProperties[4], itemProperties[5])
+                            output += seperator
+                            print(output)
+
                             print("Enter updated values below (to keep old values just press enter):")
                             changedQuantity = self.validateQuantity()
                             changedUnitPrice = self.validateUnitPrice()
@@ -224,6 +234,14 @@ class ShoppingListApp:
         output += seperator
 
         return output
+
+    def viewItemProperties(self, item) -> str:
+        try:
+            return self.cursor.execute(f"SELECT * FROM {self.tableInUse} WHERE id='{item}';").fetchall()
+        except Exception as e:
+            return e
+
+
 
     def closeApp(self) -> None:
         print("Closing App...")
