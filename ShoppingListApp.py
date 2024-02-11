@@ -184,7 +184,7 @@ class ShoppingListApp:
 
     def deleteFromTable(self, item) -> int:
         try:
-            self.cursor.execute(f"DELETE FROM {self.tableInUse} WHERE item={item};")
+            self.cursor.execute(f"DELETE FROM {self.tableInUse} WHERE id='{item}';")
             return None
         except sqlite3.OperationalError:
             return f"Query Rejected: Item does not exist."
@@ -304,3 +304,4 @@ class ShoppingListApp:
         #ENDWHILE
     #ENDPROCEDURE
 #ENDCLASS
+
